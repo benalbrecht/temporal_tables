@@ -1,20 +1,18 @@
 os: osx
-osx_image: xcode6.4
 language: c
 env:
   global:
     - PACKDIR=dist
-  matrix:
-    - VERSION=9.6.7-1
-install:
-  - wget "http://get.enterprisedb.com/postgresql/postgresql-$VERSION-osx-binaries.zip"
-  - unzip -q -d $PACKDIR postgresql-$VERSION-osx-binaries.zip
+#install:
+#  - brew install postgresql@9.6
 script:
-  - env PATH=$PACKDIR/pgsql/bin:$PATH make install
-  - rm $PACKDIR/pgsql/share/postgresql/extension/temporal_tables--*--*.sql
-  - cd $PACKDIR/pgsql
+#  - env PATH=/usr/local/Cellar/postgresql@9.6/9.6.7/:$PATH make install
+  - env PATH=/usr/local/Cellar/postgresql/9.6.5/:$PATH make install
+  - rm /usr/local/share/postgresql/extension/temporal_tables--*--*.sql
   - |
-    tar cJf $RSRC_DIR/postgresql-Darwin-x86_64.txz \
+    tar -cJf postgresql-Darwin-x86_64.txz \
+#    -C /usr/local/Cellar/postgresql@9.6/9.6.7 \
+    -C /usr/local/Cellar/postgresql/9.6.5 \
     share/postgresql \
     lib/libicudata.57.dylib \
     lib/libicui18n.57.dylib \
@@ -26,7 +24,11 @@ script:
     lib/postgresql/*.so \
     bin/initdb \
     bin/pg_ctl \
+    bin/pg_restore \
     bin/postgres
+  - find /usr/local/Cellar/postgresql
+  - otool -L /usr/local/bin/postgres
+  - otool -L /usr/local/bin/initdb
 before_deploy:
   - git config --local user.name "Benjamin Albrecht"
   - git config --local user.email "git@albrecht.io"
