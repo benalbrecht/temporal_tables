@@ -1,25 +1,40 @@
-dist: trusty
-sudo: required
+os: osx
 language: c
 env:
-    - PG=10
-    - PG=9.6
-    - PG=9.5
-    - PG=9.4
-    - PG=9.3
-    - PG=9.2
+  global:
+    - PACKDIR=dist
+  matrix:
+    - VERSION=9.6.7-1
 install:
-    - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main 10" > /etc/apt/sources.list.d/pgdg.list'
-    - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    - PGPORT=5440
-    - sudo /etc/init.d/postgresql stop
-    - sudo apt-get -o Dir::Etc::sourcelist="/etc/apt/sources.list.d/pgdg.list" -o Dir::Etc::sourceparts='-' -o APT::Get::List-Cleanup='0' update
-    - sudo apt-get install postgresql-$PG postgresql-server-dev-$PG
-    - sudo pg_createcluster -p $PGPORT $PG test
-    - sudo sed -i '1i local all all trust' /etc/postgresql/$PG/test/pg_hba.conf
-    - sudo /etc/init.d/postgresql start $PG
+  - wget "http://get.enterprisedb.com/postgresql/postgresql-$VERSION-osx-binaries.zip"
+  - unzip -q -d $PACKDIR postgresql-$VERSION-osx-binaries.zip
 script:
-    - psql -p $PGPORT -U postgres postgres -xA -c 'select version()'
-    - make
-    - sudo make install
-    - make installcheck PGUSER=postgres PGPORT=$PGPORT || (cat regression.diffs && false)
+  - env PATH=$PACKDIR/pgsql/bin:$PATH make install
+  - rm $PACKDIR/pgsql/share/postgresql/extension/temporal_tables--*--*.sql
+  - cd $PACKDIR/pgsql
+  - |
+    tar cJf $RSRC_DIR/postgresql-Darwin-x86_64.txz \
+    share/postgresql \
+    lib/libicudata.57.dylib \
+    lib/libicui18n.57.dylib \
+    lib/libicuuc.57.dylib \
+    lib/libxml2.2.dylib \
+    lib/libssl.1.0.0.dylib \
+    lib/libcrypto.1.0.0.dylib \
+    lib/libuuid.1.1.dylib \
+    lib/postgresql/*.so \
+    bin/initdb \
+    bin/pg_ctl \
+    bin/postgres
+before_deploy:
+  - git config --local user.name "Benjamin Albrecht"
+  - git config --local user.email "git@albrecht.io"
+  - git tag $VERSION
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: b47gkaug9LuFa68rH8JmbdcRhuo5H5d3gnAgxGKMzoIDsN30BUsbiEmgFDoa3boBuOrknTlDsmqtMfvNQ/HsB6ez1QiPipOGUGIs+UC6f3jg7huvtVm4dDMZJrqL2p8drKQ+6HnBKDFaOLf6VyNyPqYzBCCHLmfhGpT450eBazqXmLyrC+cIFdq5nzfV8K0LekPVs8QhZTPpkn6kiJlD2k/WvUrlJ1UnchR5ZsgPd0JdHCb6yPd98t83wVtYeUsNJgpTuSfr14p0jGTDY7/y3xXYukO9GOnd9qGDKfkbS311mo8n+94cvF0NDPrmh/XiaUv8hDa+ocxYH42XGMJP1TKTTEakBY/wK1wgyZBsSMn3cmmlKiclTo60UHjXBQ4swELcrUtOXytqWP0rxbFy/MAu7XBSclcLfwhDx4fctr9tzHphWSxeeKtC3mySm5FiSgEThahKNiGai1VgtvWEAu+OXTVHZn9iaQ67LJbRclg5sbPAVff7CUkxstnkgNBeyb+/k9nVMGojXoBCzqUhUqYUrqO5cUoWhLHJCZpTqZJA+A4Rmet2xV9uxhM4xg6aUdrNh+ve03BtD9Ce9gic23MPks7vcg2h3Zh6iG4S0S46d5Idp1JgPM0+DzsT6qInLWJhEWpOdPiN2+LyVUGW1SuiUbVRSHMnWTkLNRR3NjE=
+  file: dist/pgsql/postgresql-Darwin-x86_64.txz
+  on:
+    repo: benalbrecht/temporal_tables
