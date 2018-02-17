@@ -3,15 +3,11 @@ language: c
 env:
   global:
     - PACKDIR=dist
-#install:
-#  - brew install postgresql@9.6
 script:
-#  - env PATH=/usr/local/Cellar/postgresql@9.6/9.6.7/:$PATH make install
   - env PATH=/usr/local/Cellar/postgresql/9.6.5/:$PATH make install
   - rm /usr/local/share/postgresql/extension/temporal_tables--*--*.sql
   - |
     tar -cJf postgresql-Darwin-x86_64.txz \
-#    -C /usr/local/Cellar/postgresql@9.6/9.6.7 \
     -C /usr/local/Cellar/postgresql/9.6.5 \
     share/postgresql \
     lib/libicudata.57.dylib \
