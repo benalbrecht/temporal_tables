@@ -2,7 +2,7 @@ os: osx
 language: c
 env:
   global:
-    - PGDIR=/usr/local/Cellar/postgresql/10.2
+    - PGDIR=/usr/local
     - TARFILE=postgresql-Darwin-x86_64
 install:
   - brew install xz
