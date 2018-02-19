@@ -4,24 +4,25 @@ env:
   global:
     - PGDIR=/usr/local
     - TARFILE=postgresql-Darwin-x86_64
+    - VERSION=10.2
 install:
-  - brew install xz
+  - brew install xz gnu-tar
   - brew upgrade postgresql
 script:
   - env PATH=$PGDIR/bin:$PATH make install
   - rm $PGDIR/share/postgresql/extension/temporal_tables--*--*.sql
   - |
-    tar -cf $TARFILE.tar \
+    gtar -chf $TARFILE.tar \
     -C $PGDIR \
     share/postgresql \
-    lib/postgresql/*.so \
+    lib/postgresql \
     bin/initdb \
     bin/pg_ctl \
     bin/pg_restore \
     bin/postgres
-  - tar -rf $TARFILE.tar -C /usr lib/libxml2.2.dylib
+  - gtar -rhf $TARFILE.tar -C /usr lib/libxml2.2.dylib
   - |
-    tar -rf $TARFILE.tar \
+    gtar -rhf $TARFILE.tar \
     -C /usr/local/opt/openssl \
     lib/libssl.1.0.0.dylib \
     lib/libcrypto.1.0.0.dylib
