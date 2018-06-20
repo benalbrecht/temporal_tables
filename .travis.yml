@@ -10,6 +10,7 @@ install:
   - wget "http://get.enterprisedb.com/postgresql/postgresql-$VERSION-osx-binaries.zip"
   - unzip -q -d $PACKDIR postgresql-$VERSION-osx-binaries.zip
 script:
+  - cd /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs && ln -s MacOSX10.10.sdk MacOSX10.8.sdk && cd -
   - env PATH=$PACKDIR/pgsql/bin:$PATH make install
   - rm $PACKDIR/pgsql/share/postgresql/extension/temporal_tables--*--*.sql
   - cd $PACKDIR/pgsql
