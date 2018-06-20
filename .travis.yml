@@ -27,6 +27,7 @@ script:
     lib/libuuid.1.1.dylib \
     lib/postgresql/*.so \
     bin/initdb \
+    bin/pg_restore \
     bin/pg_ctl \
     bin/postgres
   - xz postgresql-Darwin-x86_64.tar
